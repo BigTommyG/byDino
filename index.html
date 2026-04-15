@@ -573,10 +573,18 @@
       font-size: 0.88rem;
       color: var(--farge-tekst-dov);
     }
-    .samtykke input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
+    /* Nullstill generelle input-stiler for checkbox */
+    input[type="checkbox"] {
+      width: 18px !important;
+      height: 18px !important;
       min-width: 18px;
+      padding: 0 !important;
+      background: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+    .samtykke input[type="checkbox"] {
       margin-top: 2px;
       accent-color: var(--farge-aksent);
       cursor: pointer;
@@ -959,12 +967,12 @@
                   type="file"
                   name="fil"
                   id="filInput"
-                  accept=".stl,.3mf,.jpg,.jpeg,.pdf"
+                  accept=".stl,.3mf,.obj,.jpg,.jpeg,.pdf"
                 />
                 <div class="fil-ikon">📎</div>
                 <div class="fil-tekst">
                   <strong>Klikk for å velge fil</strong> eller dra og slipp her<br />
-                  Støttede formater: STL, 3MF, JPG, PDF – maks 10 MB
+                  Støttede formater: STL, 3MF, OBJ, JPG, PDF – maks 10 MB
                 </div>
                 <div class="fil-navn" id="filNavn"></div>
               </div>
