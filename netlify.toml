@@ -1,0 +1,47 @@
+# ============================================================
+# netlify.toml – Konfigurasjon for byDino på Netlify
+#
+# Denne filen forteller Netlify hvor nettsiden ligger
+# og hvilke innstillinger som gjelder for bygget.
+# ============================================================
+
+[build]
+  # "publish" er mappen Netlify laster opp til internett.
+  # Siden vi bare har én index.html (ingen byggsteg), er det
+  # den samme mappen vi jobber i.
+  publish = "."
+
+  # Vi har ingen byggkommando (ingen npm install / build)
+  # fordi nettsiden er ren HTML/CSS/JS.
+  command = ""
+
+# ── Nettleserhurtigbuffer (caching) ────────────────────────
+# Forteller nettlesere og CDN-en til Netlify hvor lenge de
+# skal lagre filene. Kortere verdi = raskere oppdateringer.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+# ── Sikkerhetsheadere ──────────────────────────────────────
+# Disse bidrar til bedre sikkerhet mot vanlige angrep.
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    X-Frame-Options        = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy        = "strict-origin-when-cross-origin"
+
+# ── Netlify Forms ─────────────────────────────────────────
+# Skjemaet i index.html har data-netlify="true" – Netlify
+# oppdager det automatisk ved deploy. Ingen ekstra config
+# er nødvendig, men du kan endre e-postvarsling i
+# Netlify-dashbordet under Site → Forms → Notifications.
+
+# ── Omdirigering (SPA fallback) ───────────────────────────
+# Siden er én enkelt HTML-fil, så alle URL-er peker til
+# index.html. (Ikke nødvendig for ankerdeling, men god praksis.)
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200

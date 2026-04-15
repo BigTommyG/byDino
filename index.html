@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>byDino – 3D-printing på bestilling</title>
+  <meta name="description" content="byDino er en norsk 3D-printingtjeneste for privatpersoner og småbedrifter. Send inn filen din – vi printer den." />
+
+  <!-- Google Fonts: Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       VARIABLER OG RESET
+       Her kan du endre farger og fonter for hele siden
+    ============================================================ */
+    :root {
+      /* ── Primærfarger ─────────────────────────────────────── */
+      --farge-grønn:      #4F7A52;   /* Dino Green */
+      --farge-skog:       #233528;   /* Deep Forest */
+
+      /* ── Sekundærfarger ──────────────────────────────────── */
+      --farge-bein:       #D8C7A1;   /* Bone Sand */
+      --farge-leire:      #8A6748;   /* Clay Brown */
+
+      /* ── Aksentfarger ────────────────────────────────────── */
+      --farge-aksent:     #D98E2F;   /* Amber Resin – knapper og CTA */
+      --farge-aksent-myk: #e6a44a;   /* lysere amber til hover */
+      --farge-teal:       #2F9C95;   /* Print Teal – teknologisk detalj */
+
+      /* ── Bakgrunner og overflater ────────────────────────── */
+      --farge-bakgrunn:   #141f15;   /* mørkere enn Deep Forest */
+      --farge-overflate:  #233528;   /* Deep Forest */
+      --farge-kort:       #2b4130;   /* kortbakgrunn */
+      --farge-kant:       #3a5540;   /* kantlinjer */
+
+      /* ── Tekst ───────────────────────────────────────────── */
+      --farge-tekst:      #D8C7A1;   /* Bone Sand */
+      --farge-tekst-dov:  #8fa88f;   /* dempet grønn-beige */
+
+      --font:             'Space Grotesk', sans-serif;
+      --radius:           12px;
+      --overgang:         0.25s ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--farge-bakgrunn);
+      color: var(--farge-tekst);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    /* ============================================================
+       UTILITY-KLASSER
+    ============================================================ */
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.25rem;
+    }
+
+    .seksjon {
+      padding: 5rem 0;
+    }
+
+    .seksjon-tittel {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .seksjon-tittel span { color: var(--farge-aksent); }
+
+    .seksjon-ingress {
+      color: var(--farge-tekst-dov);
+      font-size: 1.05rem;
+      margin-bottom: 3rem;
+      max-width: 560px;
+    }
+
+    /* Fade-in animasjon ved scroll */
+    .fade-inn {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-inn.synlig {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ============================================================
+       NAVIGASJON
+    ============================================================ */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(20, 31, 21, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--farge-kant);
+      padding: 0.85rem 0;
+      transition: background var(--overgang);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Logo-wrapper: setter tekst og bilde ved siden av hverandre */
+    .logo-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.1rem;
+      text-decoration: none;
+    }
+
+    .logo {
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--farge-tekst);
+      letter-spacing: -0.5px;
+    }
+    .logo span { color: var(--farge-grønn); }
+
+    /* Dinosaur-bilde i navbaren */
+    .logo-dino {
+      height: 6rem;     /* doblet størrelse */
+      width: auto;
+      /* mix-blend-mode: screen gjør svart bakgrunn usynlig */
+      mix-blend-mode: screen;
+      display: block;
+    }
+
+    .nav-lenker {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+    .nav-lenker a {
+      color: var(--farge-tekst-dov);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color var(--overgang);
+    }
+    .nav-lenker a:hover { color: var(--farge-aksent); }
+
+    /* Hamburgermeny på mobil */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px;
+    }
+    .hamburger span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--farge-tekst);
+      border-radius: 2px;
+      transition: transform var(--overgang), opacity var(--overgang);
+    }
+
+    /* ============================================================
+       HERO-SEKSJON
+    ============================================================ */
+    #hjem {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding-top: 5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .hero-etikett {
+      display: inline-block;
+      background: rgba(217, 142, 47, 0.15);
+      color: var(--farge-aksent);
+      border: 1px solid rgba(217, 142, 47, 0.3);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.3rem 0.9rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-tittel {
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 700;
+      line-height: 1.12;
+      letter-spacing: -1px;
+      margin-bottom: 1.25rem;
+    }
+    .hero-tittel span { color: var(--farge-aksent); }
+
+    .hero-tekst {
+      font-size: 1.1rem;
+      color: var(--farge-tekst-dov);
+      margin-bottom: 2rem;
+      max-width: 480px;
+    }
+
+    .knapp-primær {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--farge-aksent);
+      color: #fff;
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 0.85rem 1.75rem;
+      border-radius: var(--radius);
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: background var(--overgang), transform var(--overgang), box-shadow var(--overgang);
+      box-shadow: 0 0 0 rgba(217,142,47,0);
+    }
+    .knapp-primær:hover {
+      background: var(--farge-aksent-myk);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(217,142,47,0.35);
+    }
+    .knapp-primær:active { transform: translateY(0); }
+
+    /* SVG 3D-print animasjon */
+    .hero-svg-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .printer-svg {
+      width: 100%;
+      max-width: 420px;
+      height: auto;
+    }
+
+    /* Printer-animasjoner */
+    @keyframes skrivehode-beveg {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(60px); }
+    }
+    @keyframes layer-vekst {
+      0% { height: 0; opacity: 0; }
+      100% { height: 60px; opacity: 1; }
+    }
+    @keyframes blinking-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+    @keyframes float-op {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .skrivehode { animation: skrivehode-beveg 3s ease-in-out infinite; }
+    .pulsering  { animation: blinking-dot 1.2s ease-in-out infinite; }
+    .flytende   { animation: float-op 4s ease-in-out infinite; }
+
+    /* Bakgrunns-blur-blob */
+    .hero-blob {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(79,122,82,0.18) 0%, transparent 70%);
+      top: -100px;
+      right: -150px;
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       TJENESTER
+    ============================================================ */
+    #tjenester { background: var(--farge-overflate); }
+
+    .tjenester-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .tjeneste-kort {
+      background: var(--farge-kort);
+      border: 1px solid var(--farge-kant);
+      border-radius: var(--radius);
+      padding: 2rem;
+      transition: border-color var(--overgang), transform var(--overgang), box-shadow var(--overgang);
+      position: relative;
+      overflow: hidden;
+    }
+    .tjeneste-kort::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(217,142,47,0.05), transparent 60%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity var(--overgang);
+    }
+    .tjeneste-kort:hover::before { opacity: 1; }
+    .tjeneste-kort:hover {
+      border-color: rgba(217,142,47,0.4);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+    }
+
+    .tjeneste-ikon {
+      width: 48px;
+      height: 48px;
+      background: rgba(217,142,47,0.12);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      font-size: 1.4rem;
+    }
+
+    .tjeneste-kort h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+    }
+
+    .tjeneste-kort p {
+      font-size: 0.92rem;
+      color: var(--farge-tekst-dov);
+      line-height: 1.6;
+    }
+
+    .badge-snart {
+      display: inline-block;
+      background: rgba(217,142,47,0.15);
+      color: var(--farge-aksent);
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      margin-top: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* ============================================================
+       SLIK FUNGERER DET
+    ============================================================ */
+    #slik-fungerer-det { background: var(--farge-bakgrunn); }
+
+    .steg-liste {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      position: relative;
+    }
+
+    /* Linje mellom stegene */
+    .steg-liste::before {
+      content: '';
+      position: absolute;
+      top: 28px;
+      left: calc(25% / 2);
+      right: calc(25% / 2);
+      height: 2px;
+      background: linear-gradient(to right, var(--farge-aksent), rgba(217,142,47,0.2));
+      z-index: 0;
+    }
+
+    .steg {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .steg-nummer {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--farge-aksent);
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+      box-shadow: 0 0 0 6px rgba(217,142,47,0.15);
+    }
+
+    .steg h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    .steg p {
+      font-size: 0.88rem;
+      color: var(--farge-tekst-dov);
+    }
+
+    /* ============================================================
+       MATERIALER
+    ============================================================ */
+    #materialer { background: var(--farge-overflate); }
+
+    .material-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    .material-kort {
+      background: var(--farge-kort);
+      border: 1px solid var(--farge-kant);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      transition: border-color var(--overgang);
+    }
+    .material-kort:hover { border-color: rgba(217,142,47,0.3); }
+
+    .material-navn {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--farge-aksent);
+      margin-bottom: 0.35rem;
+    }
+
+    .material-undertittel {
+      font-size: 0.8rem;
+      color: var(--farge-tekst-dov);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 1rem;
+    }
+
+    .material-liste {
+      list-style: none;
+      font-size: 0.9rem;
+      color: var(--farge-tekst-dov);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .material-liste li::before {
+      content: '→ ';
+      color: var(--farge-aksent);
+    }
+
+    .material-info {
+      margin-top: 2.5rem;
+      padding: 1.25rem 1.5rem;
+      background: rgba(217,142,47,0.07);
+      border: 1px solid rgba(217,142,47,0.2);
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      color: var(--farge-tekst-dov);
+    }
+    .material-info strong { color: var(--farge-tekst); }
+
+    /* ============================================================
+       KONTAKTSKJEMA
+    ============================================================ */
+    #kontakt { background: var(--farge-bakgrunn); }
+
+    .skjema-wrapper {
+      background: var(--farge-kort);
+      border: 1px solid var(--farge-kant);
+      border-radius: calc(var(--radius) * 1.5);
+      padding: 2.5rem;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .skjema-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    .felt {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .felt.full-bredde { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--farge-tekst-dov);
+    }
+
+    input, select, textarea {
+      background: var(--farge-overflate);
+      border: 1px solid var(--farge-kant);
+      border-radius: 8px;
+      color: var(--farge-tekst);
+      font-family: var(--font);
+      font-size: 0.95rem;
+      padding: 0.75rem 1rem;
+      width: 100%;
+      transition: border-color var(--overgang), box-shadow var(--overgang);
+      outline: none;
+      -webkit-appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--farge-aksent);
+      box-shadow: 0 0 0 3px rgba(217,142,47,0.15);
+    }
+    textarea { resize: vertical; min-height: 120px; }
+
+    /* Filupplasting */
+    .fil-input-wrapper {
+      position: relative;
+      border: 2px dashed var(--farge-kant);
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color var(--overgang), background var(--overgang);
+    }
+    .fil-input-wrapper:hover, .fil-input-wrapper.dra-over {
+      border-color: var(--farge-aksent);
+      background: rgba(217,142,47,0.04);
+    }
+    .fil-input-wrapper input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .fil-ikon { font-size: 1.8rem; margin-bottom: 0.4rem; }
+    .fil-tekst { font-size: 0.85rem; color: var(--farge-tekst-dov); }
+    .fil-tekst strong { color: var(--farge-aksent); }
+    .fil-navn { font-size: 0.82rem; color: var(--farge-aksent); margin-top: 0.5rem; }
+
+    /* Samtykke-checkbox */
+    .samtykke {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.88rem;
+      color: var(--farge-tekst-dov);
+    }
+    .samtykke input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      min-width: 18px;
+      margin-top: 2px;
+      accent-color: var(--farge-aksent);
+      cursor: pointer;
+    }
+
+    /* Send-knapp */
+    .send-knapp {
+      width: 100%;
+      margin-top: 0.5rem;
+      font-size: 1rem;
+      padding: 1rem;
+      justify-content: center;
+    }
+
+    /* Bekreftelsesmelding */
+    .bekreftelse {
+      display: none;
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+    .bekreftelse-ikon { font-size: 3rem; margin-bottom: 1rem; }
+    .bekreftelse h3 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+    .bekreftelse p { color: var(--farge-tekst-dov); }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    footer {
+      background: var(--farge-overflate);
+      border-top: 1px solid var(--farge-kant);
+      padding: 2rem 0;
+      text-align: center;
+    }
+
+    .footer-logo {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .footer-logo span { color: var(--farge-aksent); }
+
+    .footer-tekst {
+      font-size: 0.85rem;
+      color: var(--farge-tekst-dov);
+      margin-bottom: 0.3rem;
+    }
+    .footer-tekst a {
+      color: var(--farge-aksent);
+      text-decoration: none;
+    }
+    .footer-tekst a:hover { text-decoration: underline; }
+
+    /* ============================================================
+       RESPONSIVT DESIGN (mobil-først)
+    ============================================================ */
+    @media (max-width: 900px) {
+      .tjenester-grid   { grid-template-columns: 1fr; }
+      .material-grid    { grid-template-columns: 1fr; }  /* kollapser til 1 kolonne på smal skjerm */
+      .steg-liste       { grid-template-columns: repeat(2, 1fr); }
+      .steg-liste::before { display: none; }
+    }
+
+    @media (max-width: 700px) {
+      .hero-grid        { grid-template-columns: 1fr; }
+      .hero-svg-wrapper { display: none; }
+      .skjema-grid      { grid-template-columns: 1fr; }
+      .steg-liste       { grid-template-columns: 1fr; }
+
+      .hamburger { display: flex; }
+      .nav-lenker {
+        display: none;
+        position: fixed;
+        top: 57px;
+        left: 0;
+        right: 0;
+        background: var(--farge-overflate);
+        flex-direction: column;
+        gap: 0;
+        border-bottom: 1px solid var(--farge-kant);
+        padding: 0.5rem 0;
+      }
+      .nav-lenker.åpen { display: flex; }
+      .nav-lenker li a {
+        display: block;
+        padding: 0.85rem 1.25rem;
+        font-size: 1rem;
+        border-bottom: 1px solid var(--farge-kant);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       NAVIGASJON
+  ============================================================ -->
+  <nav>
+    <div class="container nav-inner">
+      <a href="#hjem" class="logo-wrapper">
+        <span class="logo">by<span>Dino</span></span>
+        <img src="dino.png" alt="byDino dinosaur logo" class="logo-dino" />
+      </a>
+      <ul class="nav-lenker" id="navLenker">
+        <li><a href="#tjenester">Tjenester</a></li>
+        <li><a href="#slik-fungerer-det">Slik fungerer det</a></li>
+        <li><a href="#materialer">Materialer</a></li>
+        <li><a href="#kontakt">Kontakt</a></li>
+      </ul>
+      <!-- Hamburgermeny for mobil -->
+      <button class="hamburger" id="hamburger" aria-label="Åpne meny">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       HERO-SEKSJON
+  ============================================================ -->
+  <section id="hjem">
+    <div class="hero-blob" aria-hidden="true"></div>
+    <div class="container">
+      <div class="hero-grid">
+        <!-- Tekst -->
+        <div class="hero-tekst-kolonne fade-inn">
+          <div class="hero-etikett">🇳🇴 Norsk 3D-printing</div>
+          <h1 class="hero-tittel">
+            Har du en idé?<br />
+            Vi <span>printer</span> den.
+          </h1>
+          <p class="hero-tekst">
+            byDino er en 3D-printingtjeneste for privatpersoner og småbedrifter.
+            Send inn filen din – eller la oss hjelpe deg å lage noe helt nytt.
+          </p>
+          <a href="#kontakt" class="knapp-primær">
+            Send en forespørsel
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+
+        <!-- SVG-illustrasjon av 3D-printer -->
+        <div class="hero-svg-wrapper fade-inn" style="transition-delay:0.2s" aria-hidden="true">
+          <svg class="printer-svg" viewBox="0 0 400 360" xmlns="http://www.w3.org/2000/svg" fill="none">
+            <!-- Ramme -->
+            <rect x="60" y="30" width="280" height="240" rx="16" fill="#2b4130" stroke="#3a5540" stroke-width="2"/>
+            <!-- Skinner -->
+            <line x1="100" y1="80" x2="300" y2="80" stroke="#3a5540" stroke-width="4" stroke-linecap="round"/>
+            <!-- Skrivehode (beveger seg) -->
+            <g class="skrivehode">
+              <rect x="160" y="65" width="60" height="30" rx="6" fill="#D98E2F"/>
+              <!-- Dyse -->
+              <polygon points="182,95 198,95 190,108" fill="#e6a44a"/>
+              <!-- Blinkelys -->
+              <circle cx="178" cy="80" r="4" fill="#D8C7A1" class="pulsering"/>
+            </g>
+            <!-- Byggeplate -->
+            <rect x="90" y="200" width="220" height="14" rx="4" fill="#233528" stroke="#4F7A52" stroke-width="1.5"/>
+            <!-- Utskrift (lagvise rektangler som vokser) -->
+            <rect x="150" y="140" width="100" height="60" rx="4" fill="#1e3323" stroke="#D98E2F" stroke-width="1.5" opacity="0.9"/>
+            <line x1="150" y1="160" x2="250" y2="160" stroke="#D98E2F" stroke-width="1" opacity="0.4"/>
+            <line x1="150" y1="180" x2="250" y2="180" stroke="#D98E2F" stroke-width="1" opacity="0.4"/>
+            <!-- Vertikale stenger -->
+            <rect x="72" y="55" width="10" height="160" rx="4" fill="#233528"/>
+            <rect x="318" y="55" width="10" height="160" rx="4" fill="#233528"/>
+            <!-- Filament-rull (over) -->
+            <circle cx="340" cy="44" r="22" fill="#2b4130" stroke="#3a5540" stroke-width="2" class="flytende"/>
+            <circle cx="340" cy="44" r="10" fill="#233528" stroke="#D98E2F" stroke-width="1.5" class="flytende"/>
+            <!-- Filament-tråd -->
+            <path d="M340 66 Q330 80 310 80" stroke="#D98E2F" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.6"/>
+            <!-- Kontrollpanel -->
+            <rect x="100" y="250" width="200" height="5" rx="2" fill="#1e3323" stroke="#3a5540"/>
+            <!-- Glow under printer -->
+            <ellipse cx="200" cy="290" rx="100" ry="10" fill="#4F7A52" opacity="0.12"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       TJENESTER
+  ============================================================ -->
+  <section id="tjenester" class="seksjon">
+    <div class="container">
+      <h2 class="seksjon-tittel fade-inn">Hva kan vi <span>printe</span> for deg?</h2>
+      <p class="seksjon-ingress fade-inn">Vi tilbyr tre typer tjenester – fra enkel fil-printing til full design og produksjon.</p>
+
+      <div class="tjenester-grid">
+
+        <!-- Tjeneste 1 -->
+        <div class="tjeneste-kort fade-inn">
+          <div class="tjeneste-ikon">📁</div>
+          <h3>Print fra din fil</h3>
+          <p>
+            Du har allerede en 3D-fil? Perfekt. Last opp .STL eller .3MF, og vi printer
+            den for deg i valgt materiale. Rask levering og nøyaktig resultat.
+          </p>
+        </div>
+
+        <!-- Tjeneste 2 -->
+        <div class="tjeneste-kort fade-inn" style="transition-delay:0.1s">
+          <div class="tjeneste-ikon">🔧</div>
+          <h3>Knekt del? Vi lager ny.</h3>
+          <p>
+            Har du mistet eller knekt en del du ikke finner i butikken?
+            Send inn den defekte delen – eller mål den opp selv – og vi tegner
+            og printer en ny til deg.
+          </p>
+        </div>
+
+        <!-- Tjeneste 3 -->
+        <div class="tjeneste-kort fade-inn" style="transition-delay:0.2s">
+          <div class="tjeneste-ikon">✨</div>
+          <h3>Egne design</h3>
+          <p>
+            Har du en idé du vil se i virkeligheten? Vi designer og printer på bestilling.
+            Alt fra prototyper til gaver og dekorasjoner – si ifra hva du drømmer om.
+          </p>
+          <span class="badge-snart">Nettbutikk kommer snart</span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SLIK FUNGERER DET
+  ============================================================ -->
+  <section id="slik-fungerer-det" class="seksjon">
+    <div class="container">
+      <h2 class="seksjon-tittel fade-inn">Slik <span>fungerer</span> det</h2>
+      <p class="seksjon-ingress fade-inn">Fire enkle steg fra idé til ferdig produkt.</p>
+
+      <div class="steg-liste">
+
+        <div class="steg fade-inn">
+          <div class="steg-nummer">1</div>
+          <h3>Forespørsel</h3>
+          <p>Fyll ut skjemaet under og fortell oss hva du trenger – legg gjerne ved en fil eller bilde.</p>
+        </div>
+
+        <div class="steg fade-inn" style="transition-delay:0.1s">
+          <div class="steg-nummer">2</div>
+          <h3>Prisestimat</h3>
+          <p>Vi svarer deg raskt med en pris og estimert leveringstid. Ingen skjulte kostnader.</p>
+        </div>
+
+        <div class="steg fade-inn" style="transition-delay:0.2s">
+          <div class="steg-nummer">3</div>
+          <h3>Betaling</h3>
+          <p>Betaling skjer enkelt og trygt etter at vi har blitt enige om prisen.</p>
+        </div>
+
+        <div class="steg fade-inn" style="transition-delay:0.3s">
+          <div class="steg-nummer">4</div>
+          <h3>Levering</h3>
+          <p>Vi sender produktet til deg med post, eller avtaler hentested hvis du er i nærheten.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       MATERIALER OG KAPASITET
+  ============================================================ -->
+  <section id="materialer" class="seksjon">
+    <div class="container">
+      <h2 class="seksjon-tittel fade-inn">Materialer og <span>kapasitet</span></h2>
+      <p class="seksjon-ingress fade-inn">Vi bruker FDM-printing (Fused Deposition Modeling) med to populære materialer.</p>
+
+      <div class="material-grid">
+
+        <div class="material-kort fade-inn">
+          <div class="material-navn">PLA</div>
+          <div class="material-undertittel">Polylaktid – standardmaterial</div>
+          <ul class="material-liste">
+            <li>Lett å printe med høy nøyaktighet</li>
+            <li>Bra for modeller, dekorasjoner og prototyper</li>
+            <li>Miljøvennlig (plantebasert)</li>
+            <li>Tåler ikke høy varme (mykner ~60 °C)</li>
+          </ul>
+        </div>
+
+        <div class="material-kort fade-inn" style="transition-delay:0.1s">
+          <div class="material-navn">PETG</div>
+          <div class="material-undertittel">Polyetylentereftalat glykol</div>
+          <ul class="material-liste">
+            <li>Sterkere og mer fleksibelt enn PLA</li>
+            <li>Tåler varme opp til ~80 °C</li>
+            <li>Godt for funksjonelle deler og mekanikk</li>
+            <li>Litt mer krevende å printe rent</li>
+          </ul>
+        </div>
+
+
+      </div>
+
+      <!-- Infoboks om begrensninger -->
+      <div class="material-info fade-inn">
+        <strong>Begrensninger og info:</strong> Vi printer i én farge per jobb.
+        Maksimal printestørrelse er ca. <strong>220 × 220 × 250 mm</strong>.
+        Svært store objekter kan deles i flere deler og limes sammen.
+        Vi tilbyr PLA og PETG – usikker på hva som passer best? Bare spør, vi hjelper deg å velge riktig.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FORESPØRSELSSKJEMA (Netlify Forms)
+       - "netlify" og data-netlify="true" er nødvendig for Netlify
+       - Feltnavnene (name="...") kan ikke endres uten å oppdatere Netlify
+  ============================================================ -->
+  <section id="kontakt" class="seksjon">
+    <div class="container">
+      <h2 class="seksjon-tittel fade-inn" style="text-align:center">Send en <span>forespørsel</span></h2>
+      <p class="seksjon-ingress fade-inn" style="margin:0 auto 2.5rem;text-align:center">
+        Fyll ut skjemaet så svarer vi deg innen 24 timer.
+      </p>
+
+      <div class="skjema-wrapper fade-inn">
+
+        <!-- Netlify-skjema: data-netlify="true" aktiverer Netlify Forms -->
+        <form
+          name="forespørsel"
+          method="POST"
+          netlify
+          data-netlify="true"
+          netlify-honeypot="bot-felt"
+          enctype="multipart/form-data"
+          id="kontaktSkjema"
+          novalidate
+        >
+          <!-- Skjult felt for Netlify (ikke endre) -->
+          <input type="hidden" name="form-name" value="forespørsel" />
+          <!-- Honningpotte for å stoppe spam (skjult) -->
+          <p style="display:none"><label>Ikke fyll dette ut: <input name="bot-felt" /></label></p>
+
+          <div class="skjema-grid">
+
+            <!-- Navn -->
+            <div class="felt">
+              <label for="navn">Navn *</label>
+              <input type="text" id="navn" name="navn" placeholder="Ditt fulle navn" required />
+            </div>
+
+            <!-- E-post -->
+            <div class="felt">
+              <label for="epost">E-postadresse *</label>
+              <input type="email" id="epost" name="epost" placeholder="din@epost.no" required />
+            </div>
+
+            <!-- Type forespørsel -->
+            <div class="felt full-bredde">
+              <label for="type">Type forespørsel *</label>
+              <select id="type" name="type" required>
+                <option value="" disabled selected>Velg type forespørsel…</option>
+                <option value="print-fra-fil">Print fra fil (jeg har .STL/.3MF)</option>
+                <option value="knekt-del-send-inn">Knekt del – jeg sender inn delen</option>
+                <option value="knekt-del-mål-selv">Knekt del – jeg måler opp selv</option>
+                <option value="eget-design">Eget design – jeg trenger hjelp</option>
+              </select>
+            </div>
+
+            <!-- Beskrivelse -->
+            <div class="felt full-bredde">
+              <label for="beskrivelse">Beskrivelse *</label>
+              <textarea
+                id="beskrivelse"
+                name="beskrivelse"
+                placeholder="Beskriv hva du trenger – mål, farge, materiale, antall og annen relevant info."
+                required
+              ></textarea>
+            </div>
+
+            <!-- Filopplasting -->
+            <div class="felt full-bredde">
+              <label>Fil (valgfritt)</label>
+              <div class="fil-input-wrapper" id="filWrapper">
+                <input
+                  type="file"
+                  name="fil"
+                  id="filInput"
+                  accept=".stl,.3mf,.jpg,.jpeg,.pdf"
+                />
+                <div class="fil-ikon">📎</div>
+                <div class="fil-tekst">
+                  <strong>Klikk for å velge fil</strong> eller dra og slipp her<br />
+                  Støttede formater: STL, 3MF, JPG, PDF – maks 10 MB
+                </div>
+                <div class="fil-navn" id="filNavn"></div>
+              </div>
+            </div>
+
+            <!-- Samtykke -->
+            <div class="felt full-bredde">
+              <div class="samtykke">
+                <input type="checkbox" id="samtykke" name="samtykke" value="ja" required />
+                <label for="samtykke">
+                  Jeg samtykker til at byDino kan kontakte meg på oppgitt e-postadresse for
+                  å svare på denne forespørselen. *
+                </label>
+              </div>
+            </div>
+
+            <!-- Send-knapp -->
+            <div class="felt full-bredde">
+              <button type="submit" class="knapp-primær send-knapp">
+                Send forespørsel
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+              </button>
+            </div>
+
+          </div><!-- /skjema-grid -->
+        </form>
+
+        <!-- Bekreftelsesmelding (vises etter vellykket innsending) -->
+        <div class="bekreftelse" id="bekreftelse">
+          <div class="bekreftelse-ikon">✅</div>
+          <h3>Forespørselen er mottatt!</h3>
+          <p>Takk, <span id="bekreftelse-navn"></span>! Vi svarer deg på e-post innen 24 timer.</p>
+        </div>
+
+      </div><!-- /skjema-wrapper -->
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+  <footer>
+    <div class="container">
+      <div class="footer-logo">by<span>Dino</span></div>
+      <p class="footer-tekst">
+        <a href="mailto:post@bydino.no">post@bydino.no</a>
+      </p>
+      <p class="footer-tekst">Har du en idé? Vi printer den.</p>
+      <p class="footer-tekst" style="margin-top:0.75rem">© byDino 2025</p>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       JAVASCRIPT
+       Scroll-animasjoner, hamburgermeny og fil-opplasting
+  ============================================================ -->
+  <script>
+    // ── 1. SCROLL FADE-IN ──────────────────────────────────────
+    // Observerer alle elementer med klassen "fade-inn"
+    // og legger til "synlig" når de er synlige på skjermen
+    const fadeElementer = document.querySelectorAll('.fade-inn');
+
+    const scrollObserver = new IntersectionObserver(
+      (innslag) => {
+        innslag.forEach((innslag) => {
+          if (innslag.isIntersecting) {
+            innslag.target.classList.add('synlig');
+            // Slutt å observere når elementet er synlig (for ytelse)
+            scrollObserver.unobserve(innslag.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+
+    fadeElementer.forEach((el) => scrollObserver.observe(el));
+
+    // ── 2. HAMBURGERMENY (mobil) ───────────────────────────────
+    const hamburger   = document.getElementById('hamburger');
+    const navLenker   = document.getElementById('navLenker');
+
+    hamburger.addEventListener('click', () => {
+      const erÅpen = navLenker.classList.toggle('åpen');
+      hamburger.setAttribute('aria-expanded', erÅpen);
+    });
+
+    // Lukk menyen når man klikker en lenke
+    navLenker.querySelectorAll('a').forEach((lenke) => {
+      lenke.addEventListener('click', () => {
+        navLenker.classList.remove('åpen');
+      });
+    });
+
+    // ── 3. FILNAVN VED OPPLASTING ──────────────────────────────
+    const filInput   = document.getElementById('filInput');
+    const filNavn    = document.getElementById('filNavn');
+    const filWrapper = document.getElementById('filWrapper');
+
+    filInput.addEventListener('change', () => {
+      const fil = filInput.files[0];
+      if (fil) {
+        // Sjekk at filen ikke er for stor (10 MB = 10 * 1024 * 1024 bytes)
+        if (fil.size > 10 * 1024 * 1024) {
+          alert('Filen er for stor. Maks størrelse er 10 MB.');
+          filInput.value = '';
+          filNavn.textContent = '';
+          return;
+        }
+        filNavn.textContent = '✓ ' + fil.name;
+      } else {
+        filNavn.textContent = '';
+      }
+    });
+
+    // Drag-and-drop-effekt på fil-knappen
+    filWrapper.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      filWrapper.classList.add('dra-over');
+    });
+    filWrapper.addEventListener('dragleave', () => {
+      filWrapper.classList.remove('dra-over');
+    });
+    filWrapper.addEventListener('drop', () => {
+      filWrapper.classList.remove('dra-over');
+    });
+
+    // ── 4. SKJEMA – NETLIFY FORMS INNSENDING ──────────────────
+    // Netlify håndterer selve innsendingen. Vi fanger opp
+    // hendelsen for å vise en hyggelig bekreftelsesmelding.
+    const skjema      = document.getElementById('kontaktSkjema');
+    const bekreftelse = document.getElementById('bekreftelse');
+    const bekreftelseNavn = document.getElementById('bekreftelse-navn');
+
+    skjema.addEventListener('submit', async (e) => {
+      e.preventDefault(); // Stopp standard sideinnlasting
+
+      // Enkel klientside-validering
+      const navn = document.getElementById('navn').value.trim();
+      const epost = document.getElementById('epost').value.trim();
+      const type = document.getElementById('type').value;
+      const beskrivelse = document.getElementById('beskrivelse').value.trim();
+      const samtykke = document.getElementById('samtykke').checked;
+
+      if (!navn || !epost || !type || !beskrivelse || !samtykke) {
+        alert('Vennligst fyll ut alle obligatoriske felt (merket med *).');
+        return;
+      }
+
+      // Send skjemaet til Netlify via fetch
+      const skjemaData = new FormData(skjema);
+
+      try {
+        const svar = await fetch('/', {
+          method: 'POST',
+          body: skjemaData,
+        });
+
+        if (svar.ok) {
+          // Vis bekreftelse, skjul skjema
+          skjema.style.display = 'none';
+          bekreftelse.style.display = 'block';
+          bekreftelseNavn.textContent = navn;
+        } else {
+          alert('Noe gikk galt. Prøv igjen eller send e-post direkte.');
+        }
+      } catch (feil) {
+        // Fallback hvis fetch feiler (f.eks. ingen internett)
+        alert('Klarte ikke å sende forespørselen. Sjekk internettforbindelsen din og prøv igjen.');
+        console.error('Skjemafeil:', feil);
+      }
+    });
+
+    // ── 5. AKTIV NAV-LENKE VED SCROLL ─────────────────────────
+    const seksjoner = document.querySelectorAll('section[id]');
+    const navLenkeElemter = document.querySelectorAll('.nav-lenker a');
+
+    window.addEventListener('scroll', () => {
+      let nåværende = '';
+      seksjoner.forEach((seksjon) => {
+        if (window.scrollY >= seksjon.offsetTop - 120) {
+          nåværende = seksjon.getAttribute('id');
+        }
+      });
+      navLenkeElemter.forEach((lenke) => {
+        lenke.style.color = lenke.getAttribute('href') === '#' + nåværende
+          ? 'var(--farge-aksent)'
+          : '';
+      });
+    });
+  </script>
+
+</body>
+</html>
