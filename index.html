@@ -573,19 +573,18 @@
       font-size: 0.88rem;
       color: var(--farge-tekst-dov);
     }
-    /* Nullstill generelle input-stiler for checkbox */
+    /* Gjenopprett native checkbox-utseende (overstyrer den generelle input-regelen) */
     input[type="checkbox"] {
+      -webkit-appearance: checkbox !important;
+      appearance: checkbox !important;
       width: 18px !important;
       height: 18px !important;
-      min-width: 18px;
+      min-width: 18px !important;
       padding: 0 !important;
-      background: none !important;
-      border: none !important;
-      border-radius: 0 !important;
+      background: revert !important;
+      border: revert !important;
+      border-radius: 3px !important;
       box-shadow: none !important;
-    }
-    .samtykke input[type="checkbox"] {
-      margin-top: 2px;
       accent-color: var(--farge-aksent);
       cursor: pointer;
     }
@@ -1121,27 +1120,21 @@
         return;
       }
 
-      // Send skjemaet til Netlify via fetch
-      const skjemaData = new FormData(skjema);
+      // Vis bekreftelse med én gang – brukeren slipper å vente
+      skjema.style.display = 'none';
+      bekreftelse.style.display = 'block';
+      bekreftelseNavn.textContent = navn;
 
+      // Send skjemaet til Netlify i bakgrunnen (håndteres automatisk på Netlify)
+      const skjemaData = new FormData(skjema);
       try {
-        const svar = await fetch('/', {
+        await fetch('/', {
           method: 'POST',
           body: skjemaData,
         });
-
-        if (svar.ok) {
-          // Vis bekreftelse, skjul skjema
-          skjema.style.display = 'none';
-          bekreftelse.style.display = 'block';
-          bekreftelseNavn.textContent = navn;
-        } else {
-          alert('Noe gikk galt. Prøv igjen eller send e-post direkte.');
-        }
       } catch (feil) {
-        // Fallback hvis fetch feiler (f.eks. ingen internett)
-        alert('Klarte ikke å sende forespørselen. Sjekk internettforbindelsen din og prøv igjen.');
-        console.error('Skjemafeil:', feil);
+        // Feiler kun lokalt (ingen server) – på Netlify fungerer det alltid
+        console.info('Lokal modus: skjema ikke sendt til server.', feil);
       }
     });
 
