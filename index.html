@@ -907,7 +907,7 @@
 
         <!-- Netlify-skjema: data-netlify="true" aktiverer Netlify Forms -->
         <form
-          name="forespørsel"
+          name="kontakt"
           method="POST"
           netlify
           data-netlify="true"
@@ -916,8 +916,8 @@
           id="kontaktSkjema"
           novalidate
         >
-          <!-- Skjult felt for Netlify (ikke endre) -->
-          <input type="hidden" name="form-name" value="forespørsel" />
+          <!-- Skjult felt for Netlify – MÅ matche name="kontakt" over -->
+          <input type="hidden" name="form-name" value="kontakt" />
           <!-- Honningpotte for å stoppe spam (skjult) -->
           <p style="display:none"><label>Ikke fyll dette ut: <input name="bot-felt" /></label></p>
 
@@ -1125,16 +1125,35 @@
       bekreftelse.style.display = 'block';
       bekreftelseNavn.textContent = navn;
 
-      // Send skjemaet til Netlify i bakgrunnen (håndteres automatisk på Netlify)
+      // Send skjemaet til Netlify
+      // FormData henter automatisk alle felt fra skjemaet
       const skjemaData = new FormData(skjema);
+
       try {
-        await fetch('/', {
+        const svar = await fetch(window.location.pathname, {
           method: 'POST',
-          body: skjemaData,
+          headers: { 'Accept': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams(
+            // Konverter til URLSearchParams (fungerer bedre uten filopplasting)
+            Array.from(skjemaData.entries())
+              .filter(([, v]) => typeof v === 'string')
+          ).toString(),
         });
+        console.info('Netlify Forms status:', svar.status);
       } catch (feil) {
-        // Feiler kun lokalt (ingen server) – på Netlify fungerer det alltid
-        console.info('Lokal modus: skjema ikke sendt til server.', feil);
+        console.info('Lokal test – ingen server tilgjengelig:', feil);
+      }
+
+      // Prøv også multipart (nødvendig hvis bruker har lastet opp fil)
+      if (filInput.files.length > 0) {
+        try {
+          await fetch(window.location.pathname, {
+            method: 'POST',
+            body: skjemaData, // multipart/form-data med fil
+          });
+        } catch (feil) {
+          console.info('Fil-opplasting lokal test:', feil);
+        }
       }
     });
 
