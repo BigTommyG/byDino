@@ -1100,14 +1100,15 @@
     });
 
     // ── 4. SKJEMA – NETLIFY FORMS INNSENDING ──────────────────
-    // Netlify håndterer selve innsendingen. Vi fanger opp
-    // hendelsen for å vise en hyggelig bekreftelsesmelding.
     const skjema      = document.getElementById('kontaktSkjema');
     const bekreftelse = document.getElementById('bekreftelse');
     const bekreftelseNavn = document.getElementById('bekreftelse-navn');
+    const sendKnapp   = skjema.querySelector('.send-knapp');
+    const sendKnappKopi = sendKnapp.cloneNode(true);
 
-    // Klientside-validering – stopper innsending hvis felt mangler
-    skjema.addEventListener('submit', (e) => {
+    skjema.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
       const navn       = document.getElementById('navn').value.trim();
       const epost      = document.getElementById('epost').value.trim();
       const type       = document.getElementById('type').value;
@@ -1115,24 +1116,23 @@
       const samtykke   = document.getElementById('samtykke').checked;
 
       if (!navn || !epost || !type || !beskrivelse || !samtykke) {
-        e.preventDefault(); // Stopp kun hvis validering feiler
         alert('Vennligst fyll ut alle obligatoriske felt (merket med *).');
         return;
       }
-      // Validering ok – nettleseren sender skjemaet naturlig til Netlify
-      // Netlify mottar det og omdirigerer til /?sendt=1#kontakt
-    });
 
-    // Vis bekreftelsesmelding hvis siden lastes med ?sendt=1 i URL
-    // (Netlify setter dette etter vellykket innsending)
-    if (window.location.search.includes('sendt=1')) {
-      const navn = new URLSearchParams(window.location.search).get('navn') || '';
-      skjema.style.display = 'none';
-      bekreftelse.style.display = 'block';
-      bekreftelseNavn.textContent = navn;
-      // Rydd opp URL uten å laste siden på nytt
-      window.history.replaceState({}, '', '/#kontakt');
-    }
+      sendKnapp.disabled = true;
+      sendKnapp.textContent = 'Sender…';
+
+      try {
+        await fetch('/', { method: 'POST', body: new FormData(skjema) });
+        skjema.style.display = 'none';
+        bekreftelse.style.display = 'block';
+        bekreftelseNavn.textContent = navn;
+      } catch {
+        alert('Noe gikk galt. Prøv igjen eller send e-post til post@bydino.no.');
+        sendKnapp.replaceWith(sendKnappKopi);
+      }
+    });
 
     // ── 5. AKTIV NAV-LENKE VED SCROLL ─────────────────────────
     const seksjoner = document.querySelectorAll('section[id]');
