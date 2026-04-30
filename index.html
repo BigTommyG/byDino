@@ -909,6 +909,7 @@
         <form
           name="kontakt"
           method="POST"
+          action="/?sendt=1#kontakt"
           netlify
           data-netlify="true"
           netlify-honeypot="bot-felt"
@@ -1105,57 +1106,33 @@
     const bekreftelse = document.getElementById('bekreftelse');
     const bekreftelseNavn = document.getElementById('bekreftelse-navn');
 
-    skjema.addEventListener('submit', async (e) => {
-      e.preventDefault(); // Stopp standard sideinnlasting
-
-      // Enkel klientside-validering
-      const navn = document.getElementById('navn').value.trim();
-      const epost = document.getElementById('epost').value.trim();
-      const type = document.getElementById('type').value;
-      const beskrivelse = document.getElementById('beskrivelse').value.trim();
-      const samtykke = document.getElementById('samtykke').checked;
+    // Klientside-validering – stopper innsending hvis felt mangler
+    skjema.addEventListener('submit', (e) => {
+      const navn       = document.getElementById('navn').value.trim();
+      const epost      = document.getElementById('epost').value.trim();
+      const type       = document.getElementById('type').value;
+      const beskrivelse= document.getElementById('beskrivelse').value.trim();
+      const samtykke   = document.getElementById('samtykke').checked;
 
       if (!navn || !epost || !type || !beskrivelse || !samtykke) {
+        e.preventDefault(); // Stopp kun hvis validering feiler
         alert('Vennligst fyll ut alle obligatoriske felt (merket med *).');
         return;
       }
+      // Validering ok – nettleseren sender skjemaet naturlig til Netlify
+      // Netlify mottar det og omdirigerer til /?sendt=1#kontakt
+    });
 
-      // Vis bekreftelse med én gang – brukeren slipper å vente
+    // Vis bekreftelsesmelding hvis siden lastes med ?sendt=1 i URL
+    // (Netlify setter dette etter vellykket innsending)
+    if (window.location.search.includes('sendt=1')) {
+      const navn = new URLSearchParams(window.location.search).get('navn') || '';
       skjema.style.display = 'none';
       bekreftelse.style.display = 'block';
       bekreftelseNavn.textContent = navn;
-
-      // Send skjemaet til Netlify
-      // FormData henter automatisk alle felt fra skjemaet
-      const skjemaData = new FormData(skjema);
-
-      try {
-        const svar = await fetch(window.location.pathname, {
-          method: 'POST',
-          headers: { 'Accept': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams(
-            // Konverter til URLSearchParams (fungerer bedre uten filopplasting)
-            Array.from(skjemaData.entries())
-              .filter(([, v]) => typeof v === 'string')
-          ).toString(),
-        });
-        console.info('Netlify Forms status:', svar.status);
-      } catch (feil) {
-        console.info('Lokal test – ingen server tilgjengelig:', feil);
-      }
-
-      // Prøv også multipart (nødvendig hvis bruker har lastet opp fil)
-      if (filInput.files.length > 0) {
-        try {
-          await fetch(window.location.pathname, {
-            method: 'POST',
-            body: skjemaData, // multipart/form-data med fil
-          });
-        } catch (feil) {
-          console.info('Fil-opplasting lokal test:', feil);
-        }
-      }
-    });
+      // Rydd opp URL uten å laste siden på nytt
+      window.history.replaceState({}, '', '/#kontakt');
+    }
 
     // ── 5. AKTIV NAV-LENKE VED SCROLL ─────────────────────────
     const seksjoner = document.querySelectorAll('section[id]');
